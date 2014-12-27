@@ -1,0 +1,31 @@
+1.Wireless MAC address - 00:22:FA:2B:4F:50
+
+2.Private IP Address - 192.168.0.7
+
+3. By DHCP client lists
+a.
+EAPOL- authentication check by handshake
+DHCP - IP allocation
+ARP - Request to local DNS server for Converting IP address to MAC address
+b.
+gratituous ARP packet
+it is broadcasting for getting back next hop MAC address.
+
+4. 
+wifi router other interface address - 180.151.244.118
+its connection type is dynamic
+
+5.
+180.151.244.118  (traceroute from 134.79.197.200 (www.slac.stanford.edu) to 180.151.244.118 )
+
+6. 
+103.21.126.78
+ 
+7.
+trace are being sent to next hop with time to live field decreased by 1. when ttl field becomes 0 then it drops packet and send time limited exceeded ack to source.
+
+8.
+a. 9-10 transision 141.136.105.201
+b. longer distance leads to longer propogation delay time
+
+9.

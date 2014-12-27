@@ -1,0 +1,147 @@
+Exercise 1: Play Time [30 Min]
+
+Useful Reference: Man pages and http://danielmiessler.com/study/tcpdump/
+
+Play around with tcpdump, wireshark, ping, arp, route, ifconfig, host
+
+Look at /etc/hostname; /etc/hosts; /etc/network/interfaces; /etc/resolv.conf; /etc/protocols; /etc/services and understand what the files are for.
+
+At the end of this exercise, you should have some basic understanding of how a host manages network information as well as gain some experience on using networking tools.
+
+You should be able to collect a trace via tcpdump and view the trace in wireshark (using the -r option).
+
+----------------------------------------------------------------------------------------------------------------------------
+
+Exercise 2: Simple Stuff [15 Min]
+
+1. Whats your machine's host name and IP address? How did you get this information?
+A. Hostname: osl-21, Found in /etc/hostname; IP Address: 10.105.11.21, found by using `ifconfig` command (em1) 
+ 
+2. What is the next hop router's IP address and MAC address? How did you get this information?
+A. IP Address: 10.105.1.250, got through `route` (default); MAC Address: 00:19:56:ed:66:c1, through `arp`
+
+3. What is the local DNS server's host name and IP address? How did you get this information?
+A. Hostname: ubuntu; IP Adress: 127.0.1.1; This info was available in /etc/resolv.conf and /etc/host 
+
+4. What do the numbers in the file /etc/protocols represent?
+A. The file is a database that maps protocol id numbers against protocol names. This allows people to use names to specify protocols in programs.
+
+5. What is the port number associated with applications: ssh, ftp, nfs, smtp (email)?
+A. ssh: 22; ftp: 21; nfs: 2049; smtp: 25
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Exercise 3: Encapsulation and Demultiplexing [40 Min]
+
+Goal: To understand layering and demultiplexing, Hari Puttar wants to capture packets. He also wants to understand how web flows operate at the same time. So, help him design an experiment that captures only those packets that are exchanged between his machine and the  web server when he clicks the url http://synerg.cse.iitb.ac.in/.
+
+Guidance: Run tcpdump with -n option to avoid name lookup. Use wget to download the url. You could also use firefox/chrome, but this is cleaner and simpler. Your trace should not capture any background traffic. Before answering the questions, explore different packets by clicking on the individual packets. Also note the sequence of packet exchange.
+
+Report:
+
+1. Explain your design by specifying the exact commands (with options) you will run and in which order. Avoid description unless absolutely necessary.
+A. Command: tcpdump -i any -w exercise3.pcap -n '((src host synerg.cse.iitb.ac.in) or (dst host synerg.cse.iitb.ac.in))'
+   then: wireshark -r exercise4.pcap
+   Explanation: First flag is `-i`. This helps us define the interface. We are using `any` so that it gets packets from any interface.
+   Second flag is `-w` this writes the dump in a file. Then `-n` avoids name lookup and `src host <url>` ensures the packets are
+   sourced from the specified <url>. 
+
+2. Select the first TCP packet listed.
+
+a) Which next-hop node is it destined to? Specify the next-hop node's MAC and IP address. How did you determine this information?
+A. Next-hop node: Cisco_ed:66:c1 (the router, most probably); MAC Address: 00:19:56:ed:66:c1, wireshark (next (not final) destination MAC address); IP Address: 10.105.11.21, the default gateway. 
+
+b) Who is the packet's final destination? Specify the final destination’s IP address.  How did you determine this information? Can you find it’s MAC address?
+A. The packet's final destination is synerg.cse.iitb.ac.in. Its IP address is 10.129.41.2 (this came from wireshark's first packet's destination attribute). MAC address cannot be determined since it's the first packet (sent) we're analysing.
+
+c) What are the fields used at the link(Ethernet), IP and TCP headers to demux the packet at the next hop or destination? Specify the values of these fields in decimal format and the corresponding process(protocol) the packet is passed to.
+A. Ethernet header: Field - IP, value = 2048 (in decimal)
+   IP header: Field - TCP, value = 6
+   TCP header: Field - HTTP, value = 80;
+
+3. Apart from the above reporting, name your trace file as “exercise3.pcap” and add the file to your roll-number directory.
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Exercise 4: More DeMultiplexing [45 Min]
+
+Goal: With the success of the previous experiment, Hari Puttar now wants to capture and examine different types of traffic, basically arp, ICMP (protocol used by ping) and ssh. He wants to capture all of the above in just one single trace. Help him design an experiment to do the same.
+
+Guidance: In wireshark, click on the protocol field to order the packets according to the protocol.
+
+Report:
+
+1. Explain your design by specifying the exact commands (with options) you will run and in which order. Avoid description unless absolutely necessary.
+A. tcpdump -i em1 -w exercise4.pcap -n 'arp' or port 22 or 'icmp'
+   wireshark -r exercise4.pcap
+
+2. Arp protocol: Click on any one of the ARP packets.
+
+a) Trace the flow of this packet up the protocol stack i.e specify what all processes/protocols handle this packet.
+A. It starts on the Physical Layer, which is the reason for the Ethernet header. Demultiplexing it gives the ARP field value. Demultiplexing it gives out the IP field, which means it ends up in the IP stack (2048).
+
+b) What is the value of the field used in Ethernet header to pass packets to the ARP module?
+A. The value is 0x0806 in hexadecimal, and 2054 in decimal.
+
+Express it in decimal format.
+
+3. ICMP protocol: Click on any one of the ICMP packets.
+
+a) Trace the flow of this packet up the protocol stack i.e specify what all processes handle this packet.
+A. Starts off with the ethernet, with the field IP (2048). It then gets passes to IP with the field ICMP (1). Then gets passed on to ICMP removing it's header. 
+
+b) Expand the “Ethernet” header. Which higher level process (protocol) is this packet passed to and what is the value in decimals?
+A. It's passed on to the Internet Protocol stack and it's value in decimals is 2048.
+
+c) Expand the IP header. What is the value of the field used in this header to pass packets to the ICMP module? Express it in decimal format.
+A. Value is 1.
+
+4. SSH protocol: Click on any one of the SSH packets.
+
+a) Click on the IP header field. Specify the source and destination IP addresses.
+A. Source: 10.105.1.11; Destination: 10.105.11.21
+
+b) Expand the TCP header. Specify the source and destination port numbers.
+A. Source Port: SSH (22)
+   Destination Port: 39478 (39478) 
+
+c) Which machine (IP address) is the SSH server? Hint: SSH server's listen on designated ports as specified in /etc/services.
+A. Machine: 10.105.1.11, i.e the machine ssh-ed into.
+
+5. Name your trace file as “exercise4.pcap” and add the file to your roll-number directory.
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Exercise 5: Some more Demultiplexing [40 Min]
+
+Goal: Hari Puttar finds ssh protocols fascinating and now wants to capture what happens when two ssh sessions are established (at about the same time) between his machine and the same remote host. Since the sessions have same source and destination IP address, he wants to figure out how the sessions are uniquely identified. Help him capture such a trace. There should be no other background traffic.
+
+Guidance: Use two windows to run each ssh session, type the command in both windows and run these commands as close in time as possible. We will use filters to filter out unnecessary packets and capture just the first packet of both sessions in either direction (client to server and back). Type tcp.flags.syn == 0x02 in the filter's field (this essentially makes use of the syn flag of TCP header, which is set to 1 only in the first packet of the TCP connection). You should see 4 packets listed.
+
+Report:
+
+1. Explain your design by specifying the exact commands (with options) you will run and in which order. Avoid description unless absolutely necessary.
+A. tcpdump -i em1 -w exercise5.pcap -n port 22
+
+2. What is the port number used by the remote machine for the first and the second ssh session? Are both sessions connected to the same port number on the remote machine? How do you think the ssh application at remote machine distinguishes between the two sessions?
+A. The port number used by the remote machine is the same for both sessions, i.e, 22. The two varying values in the header are the destination port number and theb stream index. These values are used to distinguish the two sessions. The values for the two sessions in our case are (39590,0) and (39591,1) [(src. port, stream index)] 
+
+3. When your machine receives packets from the remote host, how does the TCP layer figure out to which ssh session this packet has to be passed? Specify the value of the fields used by TCP to do this.
+A. The different fields are - 
+   Destination ports - 39590 for one and 39591 for the other
+   Stream index - 0 for one and 1 for another
+
+4. Name your trace file as “exercise5.pcap” and add the file to your roll-number directory.
+
+Exercise 6 (EXTRA WORK, POSSIBLE EXTRA CREDIT): [10 Min]
+
+Explain what these commands do
+
+1. tcpdump udp port 520
+A. It filters the udp headers with port 520
+
+2. tcpdump -x -s 120 ip proto 89
+A. x=hex, s=snap length to 120, proto 89 filters protocol 89 packets
+
+3. tcpdump -x -s 70 host ip_addr1 and not ip_addr2
+A. x= hex, s=snap length to 70, host ip_addr1 and not ip_addr2 means get all packets with source and destination ip addresses ap_addr1 but not those with ip address ip_addr2. 

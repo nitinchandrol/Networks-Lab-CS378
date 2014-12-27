@@ -1,0 +1,54 @@
+0.1 set lan [$ns newLan $nodelist $opt(bw) $opt(delay) \
+			-llType $opt(ll) -ifqType $opt(ifq) \
+			-macType $opt(macType) -chanType $opt(chan) -macTrace ON ]
+
+0.2 1MB
+0.3 1000 , 100kb
+0.4 10.5 - 0.5 =10s
+
+0.5 1000 * 8 / 100 * 1000 = 8 ms
+0.6  0.023 s
+0.7 0 
+0.8 0.0235192
+
+0.7 401.836 kbps
+0.8 100.721 kbps
+
+1.1 tp- 100.724 kbps
+1.2 dl - 0.008116 s
+
+2. 
+throughput = 100.724 Kbps
+throughput = 201.276 Kbps
+throughput = 301.579 Kbps
+throughput = 401.836 Kbps
+throughput = 501.926 Kbps
+throughput = 600.136 Kbps
+throughput = 672.965 Kbps
+throughput = 762.908 Kbps
+throughput = 770.695 Kbps
+throughput = 813.715 Kbps
+throughput = 832.23 Kbps
+throughput = 874.181 Kbps
+throughput = 879.511 Kbps
+throughput = 904.63 Kbps
+throughput = 888.048 Kbps
+throughput = 900.337 Kbps
+throughput = 895.942 Kbps
+throughput = 907.076 Kbps
+throughput = 921.535 Kbps
+throughput = 921.671 Kbps
+throughput = 922.53 Kbps
+throughput = 927.47 Kbps
+throughput = 927.234 Kbps
+throughput = 924.969 Kbps
+throughput = 921.213 Kbps
+throughput = 925.956 Kbps
+throughput = 930.064 Kbps
+throughput = 930.802 Kbps
+throughput = 926.494 Kbps
+throughput = 927.081 Kbps
+
+2.3 10 nodes
+2.4 927.081
+
